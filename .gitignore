@@ -1,0 +1,8 @@
+
+# build items
+env/
+
+# virtualenv
+# .venv
+# venv
+# ENV
