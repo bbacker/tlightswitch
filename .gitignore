@@ -3,6 +3,13 @@
 env/
 
 # virtualenv
-# .venv
-# venv
-# ENV
+.venv
+venv
+ENV
+
+# tests
+.pytest_cache
+__pycache__
+
+
+*.pyc
