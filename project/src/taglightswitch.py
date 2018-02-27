@@ -1,3 +1,4 @@
+import datetime
 import re
 
 class BadTagError(ValueError):
@@ -20,9 +21,17 @@ class TagLightSwitch:
                 raise BadTagError("bad CSV string: " + i)
         return body
 
+    @classmethod
+    def _parse_time(cls, timestr):
+        from dateutil import parser
+        t = parser.parse(timestr)
+        return t.time()
+
     # take AWS tag name (key) and body (value), parse into start, end times
     @classmethod
     def _parse_timerange(cls,body):
         range_dict = cls._parse_csvbody(body)
-        return range_dict['start'], range_dict['end']
+        s = cls._parse_time(range_dict['start'])
+        e = cls._parse_time(range_dict['end'])
+        return s, e
 

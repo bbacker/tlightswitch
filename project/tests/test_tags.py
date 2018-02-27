@@ -1,5 +1,6 @@
 import pytest
 import taglightswitch
+import datetime
 
 cls = taglightswitch.TagLightSwitch
 
@@ -20,5 +21,7 @@ def test_csv():
     assert "" == x["key2"]
 
 def test_ranges():
-    assert ("2200", "0800") == cls._parse_timerange("start=2200,end=0800")
-    assert ("2200", "0800") == cls._parse_timerange("start=10pm,end=8am")
+    tenPM = datetime.time(10 + 12, 0)
+    eightAM = datetime.time(8,0)
+    assert (tenPM,eightAM) == cls._parse_timerange("start=22:00,end=08:00")
+    #assert ("2200", "0800") == cls._parse_timerange("start=10pm,end=8am")
