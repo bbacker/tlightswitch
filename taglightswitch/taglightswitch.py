@@ -8,6 +8,7 @@ class BadTagError(ValueError):
     pass
 
 class TagLightSwitch:
+    """find and power off EC2 instances with lightswitch: tags"""
 
     # take AWS tag body as CSV string, parse into dict
     @classmethod
