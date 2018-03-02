@@ -20,7 +20,8 @@ class SwitchableItem:
 
     def get_recommended_power_state(self, current_time):
         """given the current time and the power range in tags, should instance be on or off?"""
-        if controltags.ControlTags.time_is_within_range(self.off_range, current_time):
+        if controltags.ControlTags.time_is_within_range(self.off_range[0],
+                self.off_range[1], current_time):
             return "within time range, power off"
         else:
             return "outside time range, no change"

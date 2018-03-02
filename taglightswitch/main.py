@@ -16,11 +16,14 @@ tgt='lightswitch:timerange'
 
 now = datetime.datetime.now().time()
 
+print ('{} {} {} {} {}'.format( "instance", "current state", "range", "now",
+    "recommended state"))
+
 for (inst, si) in inst_list.items():
-    # print inst, current power state, time range, tod, recommended state
-    pprint (inst)
-    pprint (si)
-    pprint (si.get_power_state())
-    pprint (si.get_off_range())
-    pprint (now)
-    pprint (si.get_recommended_power_state(now))
+    print ('{} {} {} {} {}'.format( inst, si.get_power_state(),
+            si.get_off_range(), now, si.get_recommended_power_state(now)))
+    #pprint (si)
+    #pprint (si.get_power_state())
+    #pprint (si.get_off_range())
+    #pprint (now)
+    #pprint (si.get_recommended_power_state(now))

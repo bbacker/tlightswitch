@@ -53,4 +53,4 @@ class ControlTags:
 
         # if end time smaller than start, assume the clock has 'wrapped',
         # e.g. 10pm to 7am, so check time is after s or before e
-        return time >= end or time <= start
+        return time >= start or time <= end

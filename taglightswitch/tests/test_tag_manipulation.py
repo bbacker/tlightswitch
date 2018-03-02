@@ -39,7 +39,7 @@ def test_within_range():
     # nighttime off
     assert cls.time_is_within_range(tenPM, eightAM, tenPM)
     assert cls.time_is_within_range(tenPM, eightAM, sixAM)
-    assert cls.time_is_within_range(tenPM, eightAM, fivePM)
+    assert not cls.time_is_within_range(tenPM, eightAM, fivePM)
 
     # corner case
     assert cls.time_is_within_range(eightAM, eightAM, eightAM)
