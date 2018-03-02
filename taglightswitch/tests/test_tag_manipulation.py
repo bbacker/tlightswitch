@@ -1,9 +1,9 @@
 import pytest
-import taglightswitch
+import controltags
 import datetime
 from pprint import pprint
 
-cls = taglightswitch.TagLightSwitch
+cls = controltags.ControlTags
 
 def range_helper(rangestr):
     r = cls._parse_timerange(rangestr)
