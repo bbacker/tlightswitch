@@ -1,6 +1,7 @@
 import pytest
 import taglightswitch
 import datetime
+from pprint import pprint
 
 cls = taglightswitch.TagLightSwitch
 
@@ -25,3 +26,13 @@ def test_ranges():
     eightAM = datetime.time(8,0)
     assert (tenPM,eightAM) == cls._parse_timerange("start=22:00,end=08:00")
     #assert ("2200", "0800") == cls._parse_timerange("start=10pm,end=8am")
+
+def test_find():
+    light = taglightswitch.TagLightSwitch()
+
+    assert light.tgt_tag_name != None
+    inst_list = light.find_tagged_instances(light.tgt_tag_name)
+
+    assert len(inst_list.keys())> 0
+
+    pprint(inst_list)
