@@ -37,7 +37,7 @@ class TagLightSwitch:
         """return flattened keys and instance IDs for instances with lightswitch tags"""
         ec2 = self._get_ec2()
 
-        instances = ec2.instances.all()
+        instances = ec2.instances.all() # TODO: make smarter match with filter
         found_instances = {}
 
         for instance in instances:
