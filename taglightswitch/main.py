@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import pytest
 import taglightswitch
 import datetime
 from pprint import pprint
