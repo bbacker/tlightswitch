@@ -60,9 +60,12 @@ class TagLightSwitch:
         print ('{}  {}  {}'.format( "instance", "current_state", "recommended_state"))
 
         for (inst, si) in self.switchable_list.items():
-            current = si.get_power_state()
-            recommended = si.get_recommended_power_state(self.target_time)
-            print ('{}  {}   {}'.format( si, current, recommended))
+            #current = si.get_power_state()
+            #recommended = si.get_recommended_power_state(self.target_time)
+            #print ('{}  {}   {}'.format( si, current, recommended))
+            advice = si.advise_power_state(self.target_time)
+            self.logger.info ('{}:  {}'.format( si, advice))
+            #print ('{}:  {}'.format( si, advice))
 
     def correct(self):
         print ("{} {}".format(__name__,"TODO"))

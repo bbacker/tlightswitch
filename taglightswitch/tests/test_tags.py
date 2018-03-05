@@ -47,3 +47,22 @@ def test_within_range():
 
     # corner case
     assert cls.time_is_within_range(eightAM, eightAM, eightAM)
+
+def test_advise():
+    elevenPM = datetime.time(11 + 12, 0)
+    fivePM = datetime.time(5 + 12, 0)
+    tenPM = datetime.time(10 + 12, 0)
+    eightAM = datetime.time(8,0)
+    sixAM = datetime.time(6,0)
+    
+    # daytime off
+    assert cls.time_is_within_range(eightAM, tenPM, fivePM)
+    assert not cls.time_is_within_range(eightAM, fivePM, tenPM)
+
+    # nighttime off
+    assert cls.time_is_within_range(tenPM, eightAM, tenPM)
+    assert cls.time_is_within_range(tenPM, eightAM, sixAM)
+    assert not cls.time_is_within_range(tenPM, eightAM, fivePM)
+
+    # corner case
+    assert cls.time_is_within_range(eightAM, eightAM, eightAM)

@@ -5,14 +5,18 @@ import datetime
 from pprint import pprint
 import switchableitem
 
+# TODO: add mode OffOnly, OnOff
+
 #now = datetime.datetime.now().time()
 #lightswitcher = taglightswitch.TagLightSwitch(now)
 
-# TODO: add mode OffOnly, OnOff
+#lightswitcher = taglightswitch.TagLightSwitch()
 
-lightswitcher = taglightswitch.TagLightSwitch()
+fake_time = datetime.time(11 + 12, 0) # 11PM
+
+lightswitcher = taglightswitch.TagLightSwitch(fake_time)
 switchable_list = lightswitcher.find_tagged_instances()
 
 lightswitcher.advise()
 
-lightswitcher.correct()
+#lightswitcher.correct()
