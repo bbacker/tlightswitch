@@ -5,6 +5,10 @@ from pprint import pprint
 
 cls = controltags.ControlTags
 
+def test_default_tag_pattern():
+    tn = controltags.ControlTags.get_target_tag_name()
+    assert tn != None
+
 def range_helper(rangestr):
     r = cls.parse_timerange(rangestr)
     assert r

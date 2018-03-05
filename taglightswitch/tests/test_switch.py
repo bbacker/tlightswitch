@@ -7,9 +7,10 @@ import controltags
 # contact with AWS
 def test_find():
     light = taglightswitch.TagLightSwitch()
-
-    tn = controltags.ControlTags.get_target_tag_name()
-    assert tn != None
-    inst_list = light.find_tagged_instances(tn)
+    inst_list = light.find_tagged_instances()
 
     assert len(inst_list.keys()) > 0
+
+def test_advise():
+    light = taglightswitch.TagLightSwitch()
+    light.advise()
