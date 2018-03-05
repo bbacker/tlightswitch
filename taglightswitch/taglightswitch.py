@@ -65,7 +65,7 @@ class TagLightSwitch:
             #print ('{}  {}   {}'.format( si, current, recommended))
             advice = si.advise_power_state(self.target_time)
             self.logger.info ('{}:  {}'.format( si, advice))
-            #print ('{}:  {}'.format( si, advice))
+            print advice
 
     def correct(self):
         print ("{} {}".format(__name__,"TODO"))

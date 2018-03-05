@@ -39,25 +39,30 @@ class SwitchableItem:
     def _compute_recommended_power_state(cls, current_state, off_range, current_time, lightswitchmode):
 
         # possible states are  (pending | running | shutting-down | terminated | stopping | stopped ).
-        # rule 1: we will only consider instances in the 'running' or 'stopped' statesA
+        # rule 1: we will only consider instances in the 'running' or 'stopped'
+        # states, leave instances in any other states unchanged
         if not (current_state.lower() == 'stopped' or
                 current_state.lower() == 'running'):
             return current_state
 
-        # rule 2: if we're not within the given range, do nothing
-        if not controltags.ControlTags.time_is_within_range(off_range[0], off_range[1], current_time):
-            return current_state
+        offhours = controltags.ControlTags.time_is_within_range(off_range[0], off_range[1], current_time)
 
-        # rule 3: in range, powered on so turn off
-        if current_state == "running":
+        # rule 2: offhours powered on so turn off
+        if offhours and current_state == "running":
             return "stopped"
 
-
-        # rule 4: in range, powered off, turn back on if mode is correct
-        if current_state == "stopped" and SwitchableItem.mode_is_toggle(lightswitchmode):
+        # rule 3: onhours, powered off, turn back on if mode is correct
+        if (not offhours) and (current_state == "stopped") and SwitchableItem.mode_is_toggle(lightswitchmode):
             return "running"
 
         return current_state
+
+    def advise_power_state(self, current_time):
+        ps = self.get_power_state()
+        ns  = SwitchableItem._compute_recommended_power_state(ps, self.off_range,
+                current_time, self.mode)
+        advice = '  {}  current:{}  desired:{}'.format(self, ps, ns)
+        return advice
 
     def set_power_state(self, state):
         """set the power to the given state"""
@@ -69,6 +74,7 @@ class SwitchableItem:
         self.ec2=None
         self.tgt_tag_name = 'lightswitch:timerange'
         self.logger = logging.getLogger(__name__)
+        self.mode = "ON_OFF" # TODO: add override
 
         if instance:
             self.instance = instance
