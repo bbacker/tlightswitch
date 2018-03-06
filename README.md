@@ -1,6 +1,6 @@
 # taglightswitch
 
-power EC2 instances on/off based on tag schedule contents 
+power EC2 instances on/off based on tag schedule contents
 
 ## Goals:
 
@@ -34,12 +34,38 @@ See tagged instances
 
       % aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange
 
-## Power action usage
+see tagged instances ids and power states only
 
-TODO
+      % aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
+        | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State'
+
+## Power 'advise' usage
+
+To give advice for right now on which should be on or off.
+
+    % export AWS_PROFILE=myaccountprofile
+    % ./lightswitch_check_schedule.py
+
+or
+
+    % export AWS_PROFILE=myaccountprofile
+    % ./lightswitch_check_schedule.py -a advise
+
+To give advice for which should be on or off at 9pm tonight
+
+    % export AWS_PROFILE=myaccountprofile
+    % ./lightswitch_check_schedule.py -t 21:00
+
+
+## Power 'correct' usage
+
+To have the script take action (power on or off) for instances not matching their desired power state.
+
+    % export AWS_PROFILE=myaccountprofile
+    % ./lightswitch_check_schedule.py -a correct
 
 ## TODO:
-     * consider other approaches for timezone
      * implement mode to turn off instances, leave them off, give users means to turn back on
      * document the various means to provide AWS profile/credentials to the script
-     * output results to SNS 
+     * output results of real power actions to SNS
+     * consider other approaches for timezone
