@@ -31,6 +31,8 @@ class TagLightSwitch:
             self.session = boto3.session.Session()
             self.ec2 = self.session.resource('ec2')
         self.logger.debug('boto: %s', self.ec2)
+
+        print "determining AWS account with profile={} access_key={}".format(self.session.profile_name, self.session.get_credentials().access_key)
         return self.ec2
 
     def find_tagged_instances(self):
