@@ -2,13 +2,14 @@
 power EC2 instances on/off based on tag schedule contents 
 
 Goals:
+
     1. allow EC2 instance to be turned off at nights for cost control
-    2. minimize required interaction with AWS by the users of the EC2 instances
-    3. allow check power states vs schedule action to be executed by cron, jenkins, lambda, or command line
-    4. keep scheduled actions for instances with the instances, not a separate data store that needs to be kept in sync
-        a. allow cloud formation template or newly generated instance to opt in to schedule power by tagging their instance
-        b. allow EC2 user to opt out by removing or modifying the instance tags
-    5. allow a dry run mode where power changes are explained but not actually performed
+    1. minimize required interaction with AWS by the users of the EC2 instances
+    1. allow check power states vs schedule action to be executed by cron, jenkins, lambda, or command line
+    1. keep scheduled actions for instances with the instances, not a separate data store that needs to be kept in sync
+        - allow cloud formation template or newly generated instance to opt in to schedule power by tagging their instance
+        - allow EC2 user to opt out by removing or modifying the instance tags
+    1. allow a dry run mode where power changes are explained but not actually performed
 
    Tagging format - simple range of time during the a given day
 
