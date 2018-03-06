@@ -56,25 +56,26 @@ class TagLightSwitch:
         return found_instances
 
     def dump_aws_info(self):
-        print "AWS account {} AWS profile={} access_key={}".format(self.account, self.session.profile_name, self.session.get_credentials().access_key)
+        return "AWSaccount={} AWSprofile={} access_key={}".format(self.account, self.session.profile_name, self.session.get_credentials().access_key)
 
     def advise(self):
         if not self.switchable_list.keys():
             self.find_tagged_instances()
         
         sw_dict = self.switchable_list.items()
-        self.dump_aws_info()
-        print "advise power changes against {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat())
+        print(self.dump_aws_info())
+        print("advise power changes against {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
         for (inst, si) in sw_dict:
             advice_text = si.advise_power_state(self.target_time)
-            print advice_text
+            print(advice_text)
 
     def correct(self):
         if not self.switchable_list.keys():
             self.find_tagged_instances()
         
-        self.dump_aws_info()
-        print "correct power states for {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat())
+        sw_dict = self.switchable_list.items()
+        print(self.dump_aws_info())
+        print("correct power states for {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
         for (inst, si) in sw_dict:
             correction_text = si.correct_power_state(self.target_time)
-            print correction_text
+            print(correction_text)

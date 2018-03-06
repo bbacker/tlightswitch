@@ -18,14 +18,6 @@ class SwitchableItem:
         """ what is the current power state of the item?"""
         return self.instance.state["Name"]
 
-    def get_recommended_power_state(self, current_time):
-        """given the current time and the power range in tags, should instance be on or off?"""
-        if controltags.ControlTags.time_is_within_range(self.off_range[0],
-                self.off_range[1], current_time):
-            return "power_off"
-        else:
-            return "no_change"
-
     # make separate class methods so easier to unit test without real EC2 data
     @classmethod
     def mode_is_toggle(cls,mode):
@@ -57,6 +49,7 @@ class SwitchableItem:
 
         return current_state
 
+
     def advise_power_state(self, current_time):
         ps = self.get_power_state()
         ns  = SwitchableItem._compute_recommended_power_state(ps, self.off_range,
@@ -64,11 +57,24 @@ class SwitchableItem:
         advice = '  {}  current={}  desired={}'.format(self, ps, ns)
         return advice
 
-    def set_power_state(self, state):
-        """set the power to the given state"""
-        # TODO start_instances()
-        # TODO stop_instances()
-        return self.instance.state["Name"]
+    def correct_power_state(self, current_time):
+        ps = self.get_power_state()
+        ns  = SwitchableItem._compute_recommended_power_state(ps, self.off_range,
+                current_time, self.mode)
+
+        # TODO: new boto3 client each time, optimization = reuse parent's
+        toprint = "NO OP"
+        if ps == "stopped" and ns == "running":
+            response = boto3.client('ec2').start_instances( InstanceIds=[ self.instance.id ])
+            toprint = "POWER ON (result={})".format(response)
+
+        if ps == "running" and ns == "stopped":
+            # note Force is default which is false
+            response = boto3.client('ec2').stop_instances( InstanceIds=[ self.instance.id ])
+            toprint = "POWER OFF (result={})".format(response)
+
+        correction = '  {}  current={}  desired={}\n       {}'.format(self, ps, ns, toprint)
+        return correction
 
     def __init__(self, instance):
         self.ec2=None
@@ -93,4 +99,4 @@ class SwitchableItem:
                         self.name=v
 
     def __str__(self):
-       return "switchable({}/{}, offrange={}-{})".format(self.instance.id, self.name, self.off_range[0].strftime("%H:%M"), self.off_range[1].strftime("%H:%M"))
+        return "switchable({}/{}, offrange={}-{})".format(self.instance.id, self.name, self.off_range[0].strftime("%H:%M"), self.off_range[1].strftime("%H:%M"))
