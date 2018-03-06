@@ -30,9 +30,10 @@ class TagLightSwitch:
             region = 'us-west-2'
             self.session = boto3.session.Session()
             self.ec2 = self.session.resource('ec2')
+            self.caller_identity=boto3.client('sts').get_caller_identity()
+            self.account=self.caller_identity['Account']
         self.logger.debug('boto: %s', self.ec2)
 
-        print "determining AWS account with profile={} access_key={}".format(self.session.profile_name, self.session.get_credentials().access_key)
         return self.ec2
 
     def find_tagged_instances(self):
@@ -54,11 +55,15 @@ class TagLightSwitch:
         self.switchable_list = found_instances
         return found_instances
 
+    def dump_aws_info(self):
+        print "AWS account {} AWS profile={} access_key={}".format(self.account, self.session.profile_name, self.session.get_credentials().access_key)
+
     def advise(self):
         if not self.switchable_list.keys():
             self.find_tagged_instances()
         
         sw_dict = self.switchable_list.items()
+        self.dump_aws_info()
         print "advise power changes against {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat())
         for (inst, si) in sw_dict:
             advice_text = si.advise_power_state(self.target_time)
@@ -68,6 +73,7 @@ class TagLightSwitch:
         if not self.switchable_list.keys():
             self.find_tagged_instances()
         
+        self.dump_aws_info()
         print "correct power states for {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat())
         for (inst, si) in sw_dict:
             correction_text = si.correct_power_state(self.target_time)

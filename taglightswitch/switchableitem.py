@@ -61,7 +61,7 @@ class SwitchableItem:
         ps = self.get_power_state()
         ns  = SwitchableItem._compute_recommended_power_state(ps, self.off_range,
                 current_time, self.mode)
-        advice = '  {}  current:{}  desired:{}'.format(self, ps, ns)
+        advice = '  {}  current={}  desired={}'.format(self, ps, ns)
         return advice
 
     def set_power_state(self, state):
@@ -93,4 +93,4 @@ class SwitchableItem:
                         self.name=v
 
     def __str__(self):
-       return "SwitchableItem(ec2={}/{}, offrange={} to {})".format(self.instance.id, self.name, self.off_range[0].isoformat(), self.off_range[1].isoformat())
+       return "switchable({}/{}, offrange={}-{})".format(self.instance.id, self.name, self.off_range[0].strftime("%H:%M"), self.off_range[1].strftime("%H:%M"))
