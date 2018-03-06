@@ -35,7 +35,7 @@ See tagged instances
     $ export AWS_PROFILE=myaccountprofile
     $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange
 
-see tagged instances ids and power states only
+see tagged instances ids and power states only, requires [jq](https://stedolan.github.io/jq/tutorial/).
 
     $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
         | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State'
