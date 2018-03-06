@@ -12,7 +12,7 @@ power EC2 instances on/off based on tag schedule contents
     - allow EC2 user to opt out by removing or modifying the instance tags
 1. allow a dry run mode where power changes are explained but not actually performed
 
-## Tagging format - simple range of time during the a given day
+## Tagging format - simple range of time during the given day
 
 Ex. applying a tag to EC2 instance
 
@@ -32,37 +32,38 @@ the execute the command with a target time in PST.
 
 See tagged instances
 
-      % aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange
+    $ export AWS_PROFILE=myaccountprofile
+    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange
 
 see tagged instances ids and power states only
 
-      % aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
+    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
         | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State'
 
 ## Power 'advise' usage
 
 To give advice for right now on which should be on or off.
 
-    % export AWS_PROFILE=myaccountprofile
-    % ./lightswitch_check_schedule.py
+    $ export AWS_PROFILE=myaccountprofile
+    $ ./lightswitch_check_schedule.py
 
 or
 
-    % export AWS_PROFILE=myaccountprofile
-    % ./lightswitch_check_schedule.py -a advise
+    $ export AWS_PROFILE=myaccountprofile
+    $ ./lightswitch_check_schedule.py -a advise
 
 To give advice for which should be on or off at 9pm tonight
 
-    % export AWS_PROFILE=myaccountprofile
-    % ./lightswitch_check_schedule.py -t 21:00
+    $ export AWS_PROFILE=myaccountprofile
+    $ ./lightswitch_check_schedule.py -t 21:00
 
 
 ## Power 'correct' usage
 
 To have the script take action (power on or off) for instances not matching their desired power state.
 
-    % export AWS_PROFILE=myaccountprofile
-    % ./lightswitch_check_schedule.py -a correct
+    $ export AWS_PROFILE=myaccountprofile
+    $ ./lightswitch_check_schedule.py -a correct
 
 ## TODO:
      * implement mode to turn off instances, leave them off, give users means to turn back on
