@@ -16,14 +16,14 @@ power EC2 instances on/off based on tag schedule contents
 
 Ex. applying a tag to EC2 instance
 
-        "Key": "lightswitch:timerange", "Value": "start=19:00,end=07:00",
+        "Key": "lightswitch:offhours", "Value": "start=19:00,end=07:00",
 
 means you would like the instance to be powered off after 19:00 (7pm), powered back on at 07:00 (7AM).
 These ranges bound when the power on/off happens, but they power is done by
 the script. That means if the script was run every 10 minutes, say at 6:45AM, 6:55AM, 7:05AM,
 7:15AM, etc, the executions at 7:05AM, 7:15AM, etc would power on the server if it was off.
 Similarly the executions at 6:45AM and 6:55AM would have turned the server off if it
-was on during that time since those times fall within the "lightswitch:timerange".
+was on during that time since those times fall within the "lightswitch:offhours".
 
 The time in the range is evaluated vs the supplied target time without timezones.
 That means you if you intend a given set of ranges to be Pacific Standard Time,
@@ -33,11 +33,11 @@ the execute the command with a target time in PST.
 See tagged instances
 
     $ export AWS_PROFILE=myaccountprofile
-    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange
+    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours
 
 see tagged instances ids and power states only, requires [jq](https://stedolan.github.io/jq/tutorial/).
 
-    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
+    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours \
         | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State'
 
 ## Power 'advise' usage

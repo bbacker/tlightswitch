@@ -75,7 +75,7 @@ class SwitchableItem:
     def __init__(self, instance):
         self.ec2 = None
         self.name = ''
-        self.tgt_tag_name = 'lightswitch:timerange'
+        self.tgt_tag_name = 'lightswitch:offhours'
         self.logger = logging.getLogger(__name__)
         self.mode = "ON_OFF" # TODO: add override
 
@@ -90,7 +90,7 @@ class SwitchableItem:
                     self.tags[k] = v
                     if k == self.tgt_tag_name:
                         self.off_range_tag = v
-                        self.off_range = controltags.ControlTags.parse_timerange(v)
+                        self.off_range = controltags.ControlTags.parse_offhours(v)
                     if k.lower() == 'name':
                         self.name = v
 

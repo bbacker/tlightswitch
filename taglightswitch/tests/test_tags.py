@@ -10,7 +10,7 @@ def test_default_tag_pattern():
     assert tn != None
 
 def range_helper(rangestr):
-    r = cls.parse_timerange(rangestr)
+    r = cls.parse_offhours(rangestr)
     assert r
     assert r.start
     assert r.end
@@ -28,7 +28,7 @@ def test_csv():
 def test_ranges():
     tenPM = datetime.time(10 + 12, 0)
     eightAM = datetime.time(8,0)
-    assert (tenPM,eightAM) == cls.parse_timerange("start=22:00,end=08:00")
+    assert (tenPM,eightAM) == cls.parse_offhours("start=22:00,end=08:00")
 
 def test_within_range():
     elevenPM = datetime.time(11 + 12, 0)

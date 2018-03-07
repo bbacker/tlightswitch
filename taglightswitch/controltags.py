@@ -9,7 +9,7 @@ class ControlTags:
 
     @classmethod
     def get_target_tag_name(cls):
-        return 'lightswitch:timerange'
+        return 'lightswitch:offhours'
 
     @classmethod
     def _parse_csvbody(cls, bodystr):
@@ -33,7 +33,7 @@ class ControlTags:
         return timeval.time()
 
     @classmethod
-    def parse_timerange(cls, body):
+    def parse_offhours(cls, body):
         """ take AWS tag body, parse into start, end times"""
         range_dict = cls._parse_csvbody(body)
         start = cls._parse_time(range_dict['start'])
@@ -42,8 +42,7 @@ class ControlTags:
 
     @classmethod
     def time_is_within_range(cls, start, end, time):
-        """ does the given time fall within the timerange? """
-
+        """ does the given time fall within the supplied range? """
         if start < end:
             return time >= start and time <= end
 

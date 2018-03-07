@@ -6,9 +6,9 @@
 
 
 # list instances with lightswitch tags
-    aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
+    aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours \
         | grep InstanceId
 
 # use jq to filter out just instance IDs and states
-    aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:timerange \
+    aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours \
         | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State'
