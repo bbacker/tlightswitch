@@ -1,10 +1,9 @@
-import boto3
 import datetime
-import json
-import re
 import logging
-import switchableitem
+
+import boto3
 import controltags
+import switchableitem
 
 class BadTagError(ValueError):
     """Wrap value exception in project custom error"""
@@ -19,19 +18,22 @@ class TagLightSwitch:
         self.target_time = target_time
         if not self.target_time:
             self.target_time = datetime.datetime.now().time()
-        self.ec2=None
+        self.ec2 = None
         self.logger = logging.getLogger(__name__)
 
         self.switchable_list = {}
+        self.session = None
+        self.ec2 = None
+        self.caller_identity = None
+        self.account = None
 
     # fetch or initialize boto3 client
     def _get_ec2(self):
         if not self.ec2:
-            region = 'us-west-2'
             self.session = boto3.session.Session()
             self.ec2 = self.session.resource('ec2')
-            self.caller_identity=boto3.client('sts').get_caller_identity()
-            self.account=self.caller_identity['Account']
+            self.caller_identity = boto3.client('sts').get_caller_identity()
+            self.account = self.caller_identity['Account']
         self.logger.debug('boto: %s', self.ec2)
 
         return self.ec2
@@ -44,11 +46,10 @@ class TagLightSwitch:
         found_instances = {}
 
         for instance in instances:
-            found=False
             # if tags is NoneType, no tags and iterate will die so just add all to found lists
             if instance.tags:
-                for thisTag in instance.tags:
-                    if thisTag["Key"].startswith(self.tag_pattern):
+                for this_tag in instance.tags:
+                    if this_tag["Key"].startswith(self.tag_pattern):
                         found_instances[instance] = switchableitem.SwitchableItem(instance)
                         break
 
@@ -61,21 +62,21 @@ class TagLightSwitch:
     def advise(self):
         if not self.switchable_list.keys():
             self.find_tagged_instances()
-        
+
         sw_dict = self.switchable_list.items()
         print(self.dump_aws_info())
         print("advise power changes against {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
-        for (inst, si) in sw_dict:
-            advice_text = si.advise_power_state(self.target_time)
+        for (inst, switchable_item) in sw_dict:
+            advice_text = switchable_item.advise_power_state(self.target_time)
             print(advice_text)
 
     def correct(self):
         if not self.switchable_list.keys():
             self.find_tagged_instances()
-        
+
         sw_dict = self.switchable_list.items()
         print(self.dump_aws_info())
         print("correct power states for {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
-        for (inst, si) in sw_dict:
-            correction_text = si.correct_power_state(self.target_time)
+        for (inst, switchable_item) in sw_dict:
+            correction_text = switchable_item.correct_power_state(self.target_time)
             print(correction_text)

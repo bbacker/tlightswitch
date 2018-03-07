@@ -1,8 +1,6 @@
-import boto3
-import datetime
-import json
-import re
 import logging
+
+import boto3
 import controltags
 
 class SwitchableItem:
@@ -20,11 +18,11 @@ class SwitchableItem:
 
     # make separate class methods so easier to unit test without real EC2 data
     @classmethod
-    def mode_is_toggle(cls,mode):
+    def mode_is_toggle(cls, mode):
         return mode.lower() == "on_off"
 
     @classmethod
-    def mode_is_off_only(cls,mode):
+    def mode_is_off_only(cls, mode):
         return mode.lower() == "leaveoff"
 
     @classmethod
@@ -51,34 +49,32 @@ class SwitchableItem:
 
 
     def advise_power_state(self, current_time):
-        ps = self.get_power_state()
-        ns  = SwitchableItem._compute_recommended_power_state(ps, self.off_range,
-                current_time, self.mode)
-        advice = '  {}  current={}  desired={}'.format(self, ps, ns)
+        presentstate = self.get_power_state()
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.mode)
+        advice = '  {}  current={}  desired={}'.format(self, presentstate, nextstate)
         return advice
 
     def correct_power_state(self, current_time):
-        ps = self.get_power_state()
-        ns  = SwitchableItem._compute_recommended_power_state(ps, self.off_range,
-                current_time, self.mode)
+        presentstate = self.get_power_state()
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.mode)
 
         # TODO: new boto3 client each time, optimization = reuse parent's
         toprint = "NO OP"
-        if ps == "stopped" and ns == "running":
-            response = boto3.client('ec2').start_instances( InstanceIds=[ self.instance.id ])
+        if presentstate == "stopped" and nextstate == "running":
+            response = boto3.client('ec2').start_instances(InstanceIds=[self.instance.id])
             toprint = "POWER ON (result={})".format(response)
 
-        if ps == "running" and ns == "stopped":
+        if presentstate == "running" and nextstate == "stopped":
             # note Force is default which is false
-            response = boto3.client('ec2').stop_instances( InstanceIds=[ self.instance.id ])
+            response = boto3.client('ec2').stop_instances(InstanceIds=[self.instance.id])
             toprint = "POWER OFF (result={})".format(response)
 
-        correction = '  {}  current={}  desired={}\n       {}'.format(self, ps, ns, toprint)
+        correction = '  {}  current={}  desired={}\n       {}'.format(self, presentstate, nextstate, toprint)
         return correction
 
     def __init__(self, instance):
-        self.ec2=None
-        self.name=''
+        self.ec2 = None
+        self.name = ''
         self.tgt_tag_name = 'lightswitch:timerange'
         self.logger = logging.getLogger(__name__)
         self.mode = "ON_OFF" # TODO: add override
@@ -86,17 +82,17 @@ class SwitchableItem:
         if instance:
             self.instance = instance
 
-            self.tags={}
+            self.tags = {}
             if instance.tags:
-                for thisTag in instance.tags:
-                    k = thisTag["Key"]
-                    v = thisTag["Value"]
-                    self.tags[k]=v
+                for this_tag in instance.tags:
+                    k = this_tag["Key"]
+                    v = this_tag["Value"]
+                    self.tags[k] = v
                     if k == self.tgt_tag_name:
                         self.off_range_tag = v
                         self.off_range = controltags.ControlTags.parse_timerange(v)
                     if k.lower() == 'name':
-                        self.name=v
+                        self.name = v
 
     def __str__(self):
         return "switchable({}/{}, offrange={}-{})".format(self.instance.id, self.name, self.off_range[0].strftime("%H:%M"), self.off_range[1].strftime("%H:%M"))

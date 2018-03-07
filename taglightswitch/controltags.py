@@ -1,8 +1,4 @@
-import boto3
-import datetime
-import json
 import re
-import logging
 
 class BadTagError(ValueError):
     """Wrap value exception in project custom error"""
@@ -16,14 +12,14 @@ class ControlTags:
         return 'lightswitch:timerange'
 
     @classmethod
-    def _parse_csvbody(cls,bodystr):
+    def _parse_csvbody(cls, bodystr):
         """ take AWS tag body as CSV string, parse into dict.
         e.g. start=19:00,end=07:00"""
         body = {}
         items = bodystr.split(',')
-        rx = re.compile(r'\s*(?P<key>\w+)\s*=\s*(?P<value>.*)')
+        regex = re.compile(r'\s*(?P<key>\w+)\s*=\s*(?P<value>.*)')
         for i in items:
-            match = rx.match(i)
+            match = regex.match(i)
             if match and match.group('key'):
                 body[match.group('key').lower()] = match.group('value')
             else:
@@ -33,16 +29,16 @@ class ControlTags:
     @classmethod
     def _parse_time(cls, timestr):
         from dateutil import parser
-        t = parser.parse(timestr)
-        return t.time()
+        timeval = parser.parse(timestr)
+        return timeval.time()
 
     @classmethod
-    def parse_timerange(cls,body):
+    def parse_timerange(cls, body):
         """ take AWS tag body, parse into start, end times"""
         range_dict = cls._parse_csvbody(body)
-        s = cls._parse_time(range_dict['start'])
-        e = cls._parse_time(range_dict['end'])
-        return s, e
+        start = cls._parse_time(range_dict['start'])
+        end = cls._parse_time(range_dict['end'])
+        return start, end
 
     @classmethod
     def time_is_within_range(cls, start, end, time):
