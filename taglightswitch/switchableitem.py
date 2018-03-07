@@ -62,12 +62,12 @@ class SwitchableItem:
         toprint = "NO OP"
         if presentstate == "stopped" and nextstate == "running":
             response = boto3.client('ec2').start_instances(InstanceIds=[self.instance.id])
-            toprint = "POWER ON (result={})".format(response)
+            toprint = "ACTION=POWERON (result={})".format(response)
 
         if presentstate == "running" and nextstate == "stopped":
             # note Force is default which is false
             response = boto3.client('ec2').stop_instances(InstanceIds=[self.instance.id])
-            toprint = "POWER OFF (result={})".format(response)
+            toprint = "ACTION=POWEROFF (result={})".format(response)
 
         correction = '  {}  current={}  desired={}\n       {}'.format(self, presentstate, nextstate, toprint)
         return correction
