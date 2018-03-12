@@ -1,10 +1,10 @@
 import pytest
 import taglightswitch
 import datetime
-import controltags
-import switchableitem
 
 enable_live_account_tests=False
+
+from taglightswitch import switchableitem
 
 ec2inst=None # find better way to mock an instance
 cls = switchableitem.SwitchableItem(ec2inst)

@@ -1,7 +1,7 @@
-import pytest
-import controltags
 import datetime
-from pprint import pprint
+import pytest
+
+from taglightswitch import controltags
 
 cls = controltags.ControlTags
 
