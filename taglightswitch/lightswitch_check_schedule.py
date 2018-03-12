@@ -2,6 +2,8 @@
 
 import argparse
 import datetime
+import json
+import pprint
 import sys
 import taglightswitch
 
@@ -23,7 +25,10 @@ def main():
     if args.action == 'correct':
         lightswitcher.correct()
     else:
-        lightswitcher.advise()
+        advice = lightswitcher.advise()
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(advice)
+        print json.dumps(advice)
 
 
 if __name__ == '__main__':

@@ -47,11 +47,21 @@ class SwitchableItem:
 
         return current_state
 
+    def _to_hash(self):
+        h={}
+        h['instance_id']=self.instance.id
+        h['name']=self.name
+        h['offhours']=self.off_range[0].strftime("%H:%M") + ' - ' + self.off_range[1].strftime("%H:%M")
+        return h
 
     def advise_power_state(self, current_time):
         presentstate = self.get_power_state()
         nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.mode)
         advice = '  {}  current={}  desired={}'.format(self, presentstate, nextstate)
+        advice = {}
+        advice['switchable_item'] = self._to_hash()
+        advice['current_state'] = presentstate
+        advice['desired_state'] = nextstate
         return advice
 
     def correct_power_state(self, current_time):

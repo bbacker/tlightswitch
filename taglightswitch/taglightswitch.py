@@ -32,8 +32,11 @@ class TagLightSwitch:
         if not self.ec2:
             self.session = boto3.session.Session()
             self.ec2 = self.session.resource('ec2')
-            self.caller_identity = boto3.client('sts').get_caller_identity()
-            self.account = self.caller_identity['Account']
+            caller_identity = boto3.client('sts').get_caller_identity()
+            self.aws_info = {}
+            self.aws_info['account']= caller_identity['Account']
+            self.aws_info['profile_name']= self.session.profile_name
+            self.aws_info['access_key']= self.session.get_credentials().access_key
         self.logger.debug('boto: %s', self.ec2)
 
         return self.ec2
@@ -63,12 +66,18 @@ class TagLightSwitch:
         if not self.switchable_list.keys():
             self.find_tagged_instances()
 
+        advice = {}
+
         sw_dict = self.switchable_list.items()
-        print(self.dump_aws_info())
-        print("advise power changes against {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
+        advice['aws_info'] = self.aws_info
+        advice['target_time'] = self.target_time.isoformat()
+
+        advice['advice_per_item'] = {}
         for (inst, switchable_item) in sw_dict:
-            advice_text = switchable_item.advise_power_state(self.target_time)
-            print(advice_text)
+            this_advice = switchable_item.advise_power_state(self.target_time)
+            advice['advice_per_item'][inst.id]=this_advice
+
+        return advice
 
     def correct(self):
         if not self.switchable_list.keys():
