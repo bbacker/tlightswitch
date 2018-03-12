@@ -37,8 +37,16 @@ See tagged instances
 
 see tagged instances ids and power states only, requires [jq](https://stedolan.github.io/jq/tutorial/).
 
+    $ export AWS_PROFILE=myaccountprofile
     $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours \
         | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State'
+
+# Setup
+
+ The tools do not have arguments for aws roles, keys, profiles, etc but rely on either the
+executing environment (e.g. a jenkins instance's EC2 role or 
+[environment variables](http://boto3.readthedocs.io/en/latest/guide/configuration.html#environment-variables)
+) to provide access. 
 
 ## Power 'advise' usage
 
@@ -57,7 +65,6 @@ To give advice for which should be on or off at 9pm tonight
     $ export AWS_PROFILE=myaccountprofile
     $ ./lightswitch_check_schedule.py -t 21:00
 
-
 ## Power 'correct' usage
 
 To have the script take action (power on or off) for instances not matching their desired power state.
@@ -66,7 +73,7 @@ To have the script take action (power on or off) for instances not matching thei
     $ ./lightswitch_check_schedule.py -a correct
 
 ## TODO:
+     * mock boto3 calls so tests can can include platform agnostic find and boto3 failure mode tests
      * implement mode to turn off instances, leave them off, give users means to turn back on
-     * document the various means to provide AWS profile/credentials to the script
      * output results of real power actions to SNS
-     * consider other approaches for timezone
+     * test and document use of timezones in offhours parsing
