@@ -1,14 +1,25 @@
+"""
+tags used by lightswitch to determine power on/off behavior for a given EC2 instance.
+
+At this time, only
+
+   lightswitch:offhours
+
+is defined.
+"""
+
 import re
 
 class BadTagError(ValueError):
     """Wrap value exception in project custom error"""
     pass
 
-class ControlTags:
+class ControlTags(object):
     """tagged EC2 info and state"""
 
     @classmethod
     def get_target_tag_name(cls):
+        """return the default offhours tag name. (DRY)"""
         return 'lightswitch:offhours'
 
     @classmethod

@@ -1,3 +1,13 @@
+"""
+tags used by lightswitch to determine power on/off behavior for a given EC2 instance.
+
+At this time, only
+
+   lightswitch:offhours
+
+is defined.
+"""
+
 import datetime
 import logging
 
@@ -5,12 +15,13 @@ import boto3
 import controltags
 import switchableitem
 
+
 class BadTagError(ValueError):
     """Wrap value exception in project custom error"""
     pass
 
-class TagLightSwitch:
-    """find and power off EC2 instances with lightswitch: tags"""
+class TagLightSwitch(object):
+    """find and parse values for EC2 instances with lightswitch: tags"""
 
     def __init__(self, target_time=None):
         self.tag_pattern = controltags.ControlTags.get_target_tag_name()
