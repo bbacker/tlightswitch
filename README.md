@@ -73,7 +73,7 @@ To have the script take action (power on or off) for instances not matching thei
     $ ./lightswitch_check_schedule.py -a correct
 
 ## TODO:
-     * simple travis setup
+     * simple travis setup (testing now)
      * mock boto3 calls so tests can can include platform agnostic find and boto3 failure mode tests
      * implement mode to turn off instances, leave them off, give users means to turn back on
      * output results of real power actions to SNS
