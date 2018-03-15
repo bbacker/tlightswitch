@@ -7,7 +7,7 @@ info like start/stop tag values with the instance info
 import logging
 
 import boto3
-import controltags
+from taglightswitch import ControlTags
 
 class SwitchableItem(object):
     """tagged EC2 info and state"""
@@ -41,7 +41,7 @@ class SwitchableItem(object):
                 current_state.lower() == 'running'):
             return current_state
 
-        offhours = controltags.ControlTags.time_is_within_range(off_range[0], off_range[1], current_time)
+        offhours = ControlTags.time_is_within_range(off_range[0], off_range[1], current_time)
 
         # rule 2: offhours powered on so turn off
         if offhours and current_state == "running":
@@ -100,7 +100,7 @@ class SwitchableItem(object):
                     self.tags[k] = val
                     if k == self.tgt_tag_name:
                         self.off_range_tag = val
-                        self.off_range = controltags.ControlTags.parse_offhours(val)
+                        self.off_range = ControlTags.parse_offhours(val)
                     if k.lower() == 'name':
                         self.name = val
 

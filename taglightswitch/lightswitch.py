@@ -12,19 +12,22 @@ import datetime
 import logging
 
 import boto3
-import controltags
-import switchableitem
-
+from taglightswitch import ControlTags
+from taglightswitch import SwitchableItem
 
 class BadTagError(ValueError):
     """Wrap value exception in project custom error"""
     pass
 
-class TagLightSwitch(object):
+class LightSwitch(object):
     """find and parse values for EC2 instances with lightswitch: tags"""
 
+    @classmethod
+    def get_version(cls):
+        return "ls:1"
+
     def __init__(self, target_time=None):
-        self.tag_pattern = controltags.ControlTags.get_target_tag_name()
+        self.tag_pattern = ControlTags.get_target_tag_name()
 
         self.target_time = target_time
         if not self.target_time:
@@ -61,7 +64,7 @@ class TagLightSwitch(object):
             if instance.tags:
                 for this_tag in instance.tags:
                     if this_tag["Key"].startswith(self.tag_pattern):
-                        found_instances[instance] = switchableitem.SwitchableItem(instance)
+                        found_instances[instance] = SwitchableItem(instance)
                         break
 
         self.switchable_list = found_instances

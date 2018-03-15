@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import sys
+
 import taglightswitch
 
 def main():
@@ -18,12 +19,12 @@ def main():
     else:
         target_time = datetime.datetime.now().time()
 
-    lightswitcher = taglightswitch.TagLightSwitch(target_time)
+    ls = taglightswitch.lightswitch.LightSwitch(target_time)
 
     if args.action == 'correct':
-        lightswitcher.correct()
+        ls.correct()
     else:
-        lightswitcher.advise()
+        ls.advise()
 
 
 if __name__ == '__main__':
