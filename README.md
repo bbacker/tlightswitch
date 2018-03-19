@@ -73,8 +73,9 @@ To have the script take action (power on or off) for instances not matching thei
     $ ./lightswitch_check_schedule.py -a correct
 
 ## TODO:
-     * simple travis setup (testing now)
+     * lightswitch:offdays - tag for SAT, SUN
      * mock boto3 calls so tests can can include platform agnostic find and boto3 failure mode tests
-     * implement mode to turn off instances, leave them off, give users means to turn back on
+     * lightswitch:offmode - implement mode to turn off instances, leave them off, give users means to turn back on
      * output results of real power actions to SNS
      * test and document use of timezones in offhours parsing
+     * ? ASG - reduce min and desired to zero. problem: when bringing back up, where to store original count to which min should be restored?
