@@ -16,24 +16,28 @@ def test_advise():
 
     # confirm that states other than running and stopped return unchanged
     assert "terminated" == cls._compute_recommended_power_state("terminated",
-            [fivePM, sixAM], eightAM, "ON_OFF")
+            [fivePM, sixAM], eightAM, "toggle")
 
     # outside range, should be unchanged
     assert "running" == cls._compute_recommended_power_state("running",
-            [fivePM, sixAM], eightAM, "ON_OFF")
+            [fivePM, sixAM], eightAM, "toggle")
 
     # inside range, should stop
     assert "stopped" == cls._compute_recommended_power_state("running",
-            [fivePM, sixAM], tenPM, "ON_OFF")
+            [fivePM, sixAM], tenPM, "toggle")
 
-    # inside range stoped, mode says leave off
+    # inside range stopped, mode says leave off
     assert "stopped" == cls._compute_recommended_power_state("stopped",
             [fivePM, sixAM], tenPM, "leaveOFF")
 
     # offhours and stopped, leave off
     assert "stopped" == cls._compute_recommended_power_state("stopped",
-            [fivePM, sixAM], tenPM, "ON_OFF")
+            [fivePM, sixAM], tenPM, "toggle")
 
     # not offhours (not inside range) and stopped, mode says power back up
     assert "running" == cls._compute_recommended_power_state("stopped",
-            [tenPM, sixAM], fivePM, "ON_OFF")
+            [tenPM, sixAM], fivePM, "toggle")
+
+    # not offhours (not inside range) and stopped, mode says leave off
+    assert "stopped" == cls._compute_recommended_power_state("stopped",
+            [tenPM, sixAM], fivePM, "leaveoff")
