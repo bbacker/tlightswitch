@@ -17,6 +17,12 @@ class BadTagError(ValueError):
 class ControlTags(object):
     """tagged EC2 info and state"""
 
+    MODE_OFFONLY='leaveoff' # ? better than 'offonly' ?
+    MODE_TOGGLE='toggle'
+
+    TAGNAME_HOURS='lightswitch:offhours'
+    TAGNAME_MODE='lightswitch:offmode'
+
     @classmethod
     def get_target_tag_name(cls):
         """return the default offhours tag name. (DRY)"""
@@ -60,3 +66,12 @@ class ControlTags(object):
         # if end time smaller than start, assume the clock has 'wrapped',
         # e.g. 10pm to 7am, so check time is after s or before e
         return time >= start or time <= end
+
+    @classmethod
+    def parse_offmode(cls, body):
+        """ take AWS tag body, parse into mode """
+        mode = body.lower()
+        if mode != cls.MODE_OFFONLY and mode != cls.MODE_TOGGLE:
+            raise BadTagError("invalid mode: " + i + ", valid values are " +
+                    cls.MODE_OFFONLY + " and " + cls.MODE_TOGGLE)
+        return mode
