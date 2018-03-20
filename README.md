@@ -35,12 +35,12 @@ the execute the command with a target time in PST.
 See tagged instances
 
     $ export AWS_PROFILE=myaccountprofile
-    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours
+    $ aws ec2 describe-instances --filters 'Name=tag-key,Values=lightswitch*'
 
 see tagged instances ids and power states only, requires [jq](https://stedolan.github.io/jq/tutorial/).
 
     $ export AWS_PROFILE=myaccountprofile
-    $ aws ec2 describe-instances --filters Name=tag-key,Values=lightswitch:offhours \
+    $ aws ec2 describe-instances --filters 'Name=tag-key,Values=lightswitch*' \
         | jq '.Reservations | .[] | .Instances | .[] | .InstanceId,.State.Name'
 
 # Setup

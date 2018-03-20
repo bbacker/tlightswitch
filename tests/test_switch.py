@@ -75,3 +75,5 @@ def test_advise_days():
     # offhours and offdays
     assert "stopped" == cls._compute_recommended_power_state("running",
             [fivePM, eightAM], sixAM, "toggle", weekendlist, sun)
+
+    # TODO: add cases with days specified but not time
