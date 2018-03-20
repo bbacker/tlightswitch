@@ -15,17 +15,13 @@ nowdate=datetime.datetime.now().date()
 class SwitchableItem(object):
     """tagged EC2 info and state"""
 
-    def get_offrange(self):
-        """ get the off hours in (DateTime(), DateTime()) form """
-        return self.offrange
-
     def get_power_state(self):
         """ return current power state - e.g. running or stapped. see AWS docs for all possible values """
         return self.instance.state["Name"]
 
     # make separate class methods so easier to unit test without real EC2 data
     @classmethod
-    def _compute_recommended_power_state(cls, current_state, offrange, current_time, lightswitchmode, offdays=[], current_date=nowdate):
+    def _compute_recommended_power_state(cls, current_state, offhours, current_time, lightswitchmode, offdays=[], current_date=nowdate):
 
         # possible states are  (pending | running | shutting-down | terminated | stopping | stopped ).
         # rule 1: we will only consider instances in the 'running' or 'stopped'
@@ -34,7 +30,7 @@ class SwitchableItem(object):
                 current_state.lower() == 'running'):
             return current_state
 
-        is_offhours = ControlTags.time_is_within_range(offrange[0], offrange[1], current_time)
+        is_offhours = ControlTags.time_is_within_range(offhours[0], offhours[1], current_time)
         is_offday = ControlTags.date_matches_an_offday(offdays, current_date)
 
         # rule 2: offhours powered on so turn off
@@ -55,7 +51,7 @@ class SwitchableItem(object):
     def advise_power_state(self, current_time, current_date=nowdate):
         """ given current time, return string describing object and present, desired power state"""
         presentstate = self.get_power_state()
-        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.offrange, current_time, self.offmode, self.offdays, current_date)
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.offhours, current_time, self.offmode, self.offdays, current_date)
         advice = '  {}  current={}  desired={}'.format(self, presentstate, nextstate)
         return advice
 
@@ -64,7 +60,7 @@ class SwitchableItem(object):
         desired power state, initiate on/off required to correct if present and
         desired do not match"""
         presentstate = self.get_power_state()
-        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.offrange, current_time, self.offmode, self.offdays, current_date)
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.offhours, current_time, self.offmode, self.offdays, current_date)
 
         # TODO: new boto3 client each time, optimization = reuse parent class's
         toprint = "NO OP"
@@ -84,7 +80,7 @@ class SwitchableItem(object):
         self.ec2 = None
         self.name = ''
         self.logger = logging.getLogger(__name__)
-        self.offrange=[]
+        self.offhours=[]
         self.offmode = ControlTags.MODE_TOGGLE # default
         self.offdays=[]
 
@@ -99,7 +95,7 @@ class SwitchableItem(object):
                     self.tags[k] = val
                     if k == ControlTags.TAGNAME_HOURS:
                         self.range_tag = val
-                        self.offrange = ControlTags.parse_offhours(val)
+                        self.offhours = ControlTags.parse_offhours(val)
                     if k == ControlTags.TAGNAME_MODE:
                         self.offmode = ControlTags.parse_offmode(val)
 
@@ -110,5 +106,5 @@ class SwitchableItem(object):
                         self.name = val
 
     def __str__(self):
-        return "switchable({}/{}, offrange={}-{} offdays={} offmode={})".format(self.instance.id, self.name,
-                        self.offrange[0].strftime("%H:%M"), self.offrange[1].strftime("%H:%M"), self.offdays, self.offmode)
+        return "switchable({}/{}, offhours={}-{} offdays={} offmode={})".format(self.instance.id, self.name,
+                        self.offhours[0].strftime("%H:%M"), self.offhours[1].strftime("%H:%M"), self.offdays, self.offmode)
