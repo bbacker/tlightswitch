@@ -9,6 +9,7 @@ is defined.
 """
 
 import re
+from dateutil import parser
 
 class BadTagError(ValueError):
     """Wrap value exception in project custom error"""
@@ -22,6 +23,22 @@ class ControlTags(object):
 
     TAGNAME_HOURS='lightswitch:offhours'
     TAGNAME_MODE='lightswitch:offmode'
+    TAGNAME_DAYS='lightswitch:offdays'
+
+    @classmethod
+    def explain_tags(cls, body):
+        """ return usage string containing tag names, formats """
+        s = """
+            lightswitch:offhours=21:00-7:00
+            lightswitch:offhours=21:00-23:00
+
+            lightswitch:offmode=toggle
+            lightswitch:offmode=offonly
+
+            lightswitch:offdays=sat,sun
+            lightswitch:offdays=monday
+        """
+        return s
 
     @classmethod
     def get_target_tag_name(cls):
@@ -45,7 +62,6 @@ class ControlTags(object):
 
     @classmethod
     def _parse_time(cls, timestr):
-        from dateutil import parser
         timeval = parser.parse(timestr)
         return timeval.time()
 
@@ -75,3 +91,23 @@ class ControlTags(object):
             raise BadTagError("invalid mode: " + i + ", valid values are " +
                     cls.MODE_OFFONLY + " and " + cls.MODE_TOGGLE)
         return mode
+
+    @classmethod
+    def parse_offdays(cls, body):
+        """ take AWS tag body, parse into list of days off.
+        format is from DateTime weekday() where mon=0, ... sunday = 6,
+        duplicates are dropped"""
+        seen={}
+        day_name_list = body.lower().split(',')
+        for day_name in day_name_list:
+            day_num=parser.parse(day_name).weekday()
+            seen[day_num]=day_num
+
+        return list(seen.keys())
+
+    @classmethod
+    def date_matches_an_offday(cls, offdaylist, date_to_test):
+        """ does the supplied date hit an enumerated off day?
+        If there are no off days (empty list), return false"""
+        dow_to_test = date_to_test.weekday()
+        return dow_to_test in offdaylist

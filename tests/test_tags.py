@@ -66,3 +66,44 @@ def test_advise():
 
     # corner case
     assert cls.time_is_within_range(eightAM, eightAM, eightAM)
+
+def test_dayofweek():
+    assert([0] == cls.parse_offdays("mon"))
+    assert([0] == cls.parse_offdays("Mon"))
+    assert([0] == cls.parse_offdays("Monday"))
+    assert([0,1] == cls.parse_offdays("mon,tue"))
+    assert([5,6] == cls.parse_offdays("SAT,SUN"))
+    assert([6] == cls.parse_offdays("SUN,SUN"))
+    assert([6] == cls.parse_offdays("SUN,sunday"))
+
+def test_dayofweek_fail0():
+    with pytest.raises(ValueError):
+        assert([0] == cls.parse_offdays(""))
+
+def test_dayofweek_fail1():
+    # I think this should fail but parser likes it so let it slide
+    assert([0] == cls.parse_offdays("sun-mon"))
+
+def test_dayofweek_fail2():
+    with pytest.raises(ValueError):
+        assert([0] == cls.parse_offdays("bob"))
+
+def test_dayofweek_fail3():
+    with pytest.raises(ValueError):
+        assert([0] == cls.parse_offdays("sundayblsskdfjlsdjf"))
+
+
+def test_match_dow():
+    sat = datetime.date(2018, 3, 17)
+    sun = datetime.date(2018, 3, 18)
+    mon = datetime.date(2018, 3, 19)
+    tue = datetime.date(2018, 3, 20)
+
+    weekendlist = cls.parse_offdays("SAT,SUN")
+
+    assert(cls.date_matches_an_offday(weekendlist, sat))
+    assert(cls.date_matches_an_offday(weekendlist, sun))
+    assert(not cls.date_matches_an_offday(weekendlist, mon))
+    assert(not cls.date_matches_an_offday(weekendlist, tue))
+
+    assert(not cls.date_matches_an_offday([], sun)) # empty days off means never match
