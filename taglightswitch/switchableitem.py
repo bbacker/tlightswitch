@@ -22,16 +22,6 @@ class SwitchableItem(object):
 
     # make separate class methods so easier to unit test without real EC2 data
     @classmethod
-    def mode_is_toggle(cls, mode):
-        """ is mode set to toggle power off and on (vs leave off) """
-        return mode.lower() == "on_off"
-
-    @classmethod
-    def mode_is_off_only(cls, mode):
-        """ is mode set to leave power off and on (vs toggle off and on) """
-        return mode.lower() == "leaveoff"
-
-    @classmethod
     def _compute_recommended_power_state(cls, current_state, off_range, current_time, lightswitchmode):
 
         # possible states are  (pending | running | shutting-down | terminated | stopping | stopped ).
@@ -48,7 +38,7 @@ class SwitchableItem(object):
             return "stopped"
 
         # rule 3: onhours, powered off, turn back on if mode is correct
-        if (not offhours) and (current_state == "stopped") and SwitchableItem.mode_is_toggle(lightswitchmode):
+        if (not offhours) and (current_state == "stopped") and lightswitchmode == ControlTags.MODE_TOGGLE:
             return "running"
 
         return current_state
@@ -57,7 +47,7 @@ class SwitchableItem(object):
     def advise_power_state(self, current_time):
         """ given current time, return string describing object and present, desired power state"""
         presentstate = self.get_power_state()
-        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.mode)
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.offmode)
         advice = '  {}  current={}  desired={}'.format(self, presentstate, nextstate)
         return advice
 
@@ -66,7 +56,7 @@ class SwitchableItem(object):
         desired power state, initiate on/off required to correct if present and
         desired do not match"""
         presentstate = self.get_power_state()
-        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.mode)
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.offmode)
 
         # TODO: new boto3 client each time, optimization = reuse parent class's
         toprint = "NO OP"
@@ -85,9 +75,8 @@ class SwitchableItem(object):
     def __init__(self, instance):
         self.ec2 = None
         self.name = ''
-        self.tgt_tag_name = 'lightswitch:offhours'
         self.logger = logging.getLogger(__name__)
-        self.mode = "ON_OFF" # TODO: add override
+        self.offmode = ControlTags.MODE_TOGGLE # default
 
         if instance:
             self.instance = instance
@@ -98,11 +87,16 @@ class SwitchableItem(object):
                     k = this_tag["Key"]
                     val = this_tag["Value"]
                     self.tags[k] = val
-                    if k == self.tgt_tag_name:
+                    if k == ControlTags.TAGNAME_HOURS:
                         self.off_range_tag = val
                         self.off_range = ControlTags.parse_offhours(val)
+                    if k == ControlTags.TAGNAME_MODE:
+                        self.offmode = ControlTags.parse_offmode(val)
+
                     if k.lower() == 'name':
                         self.name = val
 
     def __str__(self):
-        return "switchable({}/{}, offrange={}-{})".format(self.instance.id, self.name, self.off_range[0].strftime("%H:%M"), self.off_range[1].strftime("%H:%M"))
+        return "switchable({}/{}, offrange={}-{} offmode={})".format(self.instance.id, self.name,
+                        self.off_range[0].strftime("%H:%M"),
+                        self.off_range[1].strftime("%H:%M"), self.offmode)
