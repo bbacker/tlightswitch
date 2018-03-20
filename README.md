@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bbacker/taglightswitch.svg?branch=master)](https://travis-ci.org/bbacker/taglightswitch)
+
 # taglightswitch
 
 power EC2 instances on/off based on tag schedule contents
