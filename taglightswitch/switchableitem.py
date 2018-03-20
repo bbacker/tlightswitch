@@ -7,14 +7,17 @@ info like start/stop tag values with the instance info
 import logging
 
 import boto3
+import datetime
 from taglightswitch import ControlTags
+
+nowdate=datetime.datetime.now().date()
 
 class SwitchableItem(object):
     """tagged EC2 info and state"""
 
-    def get_off_range(self):
+    def get_offrange(self):
         """ get the off hours in (DateTime(), DateTime()) form """
-        return self.off_range
+        return self.offrange
 
     def get_power_state(self):
         """ return current power state - e.g. running or stapped. see AWS docs for all possible values """
@@ -22,7 +25,7 @@ class SwitchableItem(object):
 
     # make separate class methods so easier to unit test without real EC2 data
     @classmethod
-    def _compute_recommended_power_state(cls, current_state, off_range, current_time, lightswitchmode):
+    def _compute_recommended_power_state(cls, current_state, offrange, current_time, lightswitchmode, offdays=[], current_date=nowdate):
 
         # possible states are  (pending | running | shutting-down | terminated | stopping | stopped ).
         # rule 1: we will only consider instances in the 'running' or 'stopped'
@@ -31,32 +34,37 @@ class SwitchableItem(object):
                 current_state.lower() == 'running'):
             return current_state
 
-        offhours = ControlTags.time_is_within_range(off_range[0], off_range[1], current_time)
+        is_offhours = ControlTags.time_is_within_range(offrange[0], offrange[1], current_time)
+        is_offday = ControlTags.date_matches_an_offday(offdays, current_date)
 
         # rule 2: offhours powered on so turn off
-        if offhours and current_state == "running":
+        if is_offhours and current_state == "running":
             return "stopped"
 
-        # rule 3: onhours, powered off, turn back on if mode is correct
-        if (not offhours) and (current_state == "stopped") and lightswitchmode == ControlTags.MODE_TOGGLE:
+        # rule 3: offday powered on so turn off
+        if is_offday and current_state == "running":
+            return "stopped"
+
+        # rule 4: it's not offhours or offdays and it's powered off so turn back on if mode is toggle
+        if (not is_offhours) and (current_state == "stopped") and lightswitchmode == ControlTags.MODE_TOGGLE:
             return "running"
 
         return current_state
 
 
-    def advise_power_state(self, current_time):
+    def advise_power_state(self, current_time, current_date=nowdate):
         """ given current time, return string describing object and present, desired power state"""
         presentstate = self.get_power_state()
-        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.offmode)
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.offrange, current_time, self.offmode, self.offdays, current_date)
         advice = '  {}  current={}  desired={}'.format(self, presentstate, nextstate)
         return advice
 
-    def correct_power_state(self, current_time):
+    def correct_power_state(self, current_time, current_date=nowdate):
         """ given current time, return string describing object and present,
         desired power state, initiate on/off required to correct if present and
         desired do not match"""
         presentstate = self.get_power_state()
-        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.off_range, current_time, self.offmode)
+        nextstate = SwitchableItem._compute_recommended_power_state(presentstate, self.offrange, current_time, self.offmode, self.offdays, current_date)
 
         # TODO: new boto3 client each time, optimization = reuse parent class's
         toprint = "NO OP"
@@ -76,7 +84,9 @@ class SwitchableItem(object):
         self.ec2 = None
         self.name = ''
         self.logger = logging.getLogger(__name__)
+        self.offrange=[]
         self.offmode = ControlTags.MODE_TOGGLE # default
+        self.offdays=[]
 
         if instance:
             self.instance = instance
@@ -88,15 +98,17 @@ class SwitchableItem(object):
                     val = this_tag["Value"]
                     self.tags[k] = val
                     if k == ControlTags.TAGNAME_HOURS:
-                        self.off_range_tag = val
-                        self.off_range = ControlTags.parse_offhours(val)
+                        self.range_tag = val
+                        self.offrange = ControlTags.parse_offhours(val)
                     if k == ControlTags.TAGNAME_MODE:
                         self.offmode = ControlTags.parse_offmode(val)
+
+                    if k == ControlTags.TAGNAME_DAYS:
+                        self.offdays = ControlTags.parse_offdays(val)
 
                     if k.lower() == 'name':
                         self.name = val
 
     def __str__(self):
-        return "switchable({}/{}, offrange={}-{} offmode={})".format(self.instance.id, self.name,
-                        self.off_range[0].strftime("%H:%M"),
-                        self.off_range[1].strftime("%H:%M"), self.offmode)
+        return "switchable({}/{}, offrange={}-{} offdays={} offmode={})".format(self.instance.id, self.name,
+                        self.offrange[0].strftime("%H:%M"), self.offrange[1].strftime("%H:%M"), self.offdays, self.offmode)
