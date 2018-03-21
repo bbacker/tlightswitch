@@ -78,23 +78,27 @@ executing environment (e.g. a jenkins instance's EC2 role or
 [environment variables](http://boto3.readthedocs.io/en/latest/guide/configuration.html#environment-variables)
 ) to provide access. 
 
+Execute this to set AWS_PROFILE env var before any of the following examples:
+
+    $ export AWS_PROFILE=myaccountprofile
+
 ## Power 'advise' usage
 
 To give advice for right now on which should be on or off.
 
-    $ AWS_PROFILE=myaccountprofile   ./lightswitch_check_schedule.py
+    $ check_lightswitches.py
 
 or
 
-    $ AWS_PROFILE=myprofile  ./lightswitch_check_schedule.py -a advise
+    $ check_lightswitches.py -a advise
 
 To give advice for which should be on or off at 9pm tonight
 
-    $ AWS_PROFILE=myprofile    ./lightswitch_check_schedule.py -t 21:00
+    $ check_lightswitches.py -t 21:00
 
 To give advice for which should be on or off at 9pm next Sunday
 
-    $ AWS_PROFILE=myprofile    ./lightswitch_check_schedule.py -t 21:00 -d sunday
+    $ check_lightswitches.py -t 21:00 -d sunday
 
 ## Power 'correct' usage
 
@@ -102,16 +106,14 @@ To have the script take action (power on or off) for instances not matching thei
 
 Apply power changes suitable for today and current time:
 
-    $ AWS_PROFILE=myaccountprofile   ./lightswitch_check_schedule.py -a correct
+    $ check_lightswitches.py -a correct
 
 The -t and -d arguments can be applied for 'correct' as well, but be careful - you're applying power changes
 for a different time than the original user applying the tags desired.
 
 ## TODO:
     * examples on how to add, change tags from CLI
-    * lightswitch:offdays - tag for SAT, SUN
     * mock boto3 calls so tests can can include platform agnostic find and boto3 failure mode tests
-    * lightswitch:offmode - implement mode to turn off instances, leave them off, give users means to turn back on
     * output results of real power actions to SNS
     * test and document use of timezones in offhours parsing
     * ? ASG - reduce min and desired to zero. problem: when bringing back up, where to store original count to which min should be restored?
