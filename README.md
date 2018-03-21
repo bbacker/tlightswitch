@@ -111,9 +111,14 @@ Apply power changes suitable for today and current time:
 The -t and -d arguments can be applied for 'correct' as well, but be careful - you're applying power changes
 for a different time than the original user applying the tags desired.
 
-## TODO:
+## TODO
+    * install check script somewhere in $PATH
+    * package to pypi
     * examples on how to add, change tags from CLI
     * mock boto3 calls so tests can can include platform agnostic find and boto3 failure mode tests
-    * output results of real power actions to SNS
     * test and document use of timezones in offhours parsing
+
+## TO CONSIDER
+    * document minimum viable AWS role to allow users to power instances back on, adjust tags to temporarally suspend power off
+    * output results of real power actions to SNS
     * ? ASG - reduce min and desired to zero. problem: when bringing back up, where to store original count to which min should be restored?

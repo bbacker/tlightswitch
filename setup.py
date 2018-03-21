@@ -8,5 +8,6 @@ setup(name='taglightswitch',
         author_email='bryan.backer@gmail.com',
         license='MIT',
         packages=['taglightswitch'],
+        scripts=['taglightswitch/check_lightswitches'],
         zip_safe=False)
 
