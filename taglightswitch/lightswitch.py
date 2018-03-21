@@ -26,12 +26,17 @@ class LightSwitch(object):
     def get_version(cls):
         return "ls:1"
 
-    def __init__(self, target_time=None):
+    def __init__(self, target_time=None, target_date=None):
         self.tag_pattern = ControlTags.get_target_tag_name()
 
         self.target_time = target_time
         if not self.target_time:
             self.target_time = datetime.datetime.now().time()
+
+        self.target_date = target_date
+        if not self.target_date:
+            self.target_date = datetime.datetime.now().date()
+
         self.ec2 = None
         self.logger = logging.getLogger(__name__)
 
@@ -79,9 +84,9 @@ class LightSwitch(object):
 
         sw_dict = self.switchable_list.items()
         print(self.dump_aws_info())
-        print("advise power changes against {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
+        print("advise power changes against {} switchable items for target time {} date {}".format(len(sw_dict), self.target_time.isoformat(), self.target_date.isoformat()))
         for (inst, switchable_item) in sw_dict:
-            advice_text = switchable_item.advise_power_state(self.target_time)
+            advice_text = switchable_item.advise_power_state(self.target_time, self.target_date)
             print(advice_text)
 
     def correct(self):
@@ -90,7 +95,7 @@ class LightSwitch(object):
 
         sw_dict = self.switchable_list.items()
         print(self.dump_aws_info())
-        print("correct power states for {} switchable items for target time {}".format(len(sw_dict), self.target_time.isoformat()))
+        print("correct power states for {} switchable items for target time {} date {}".format(len(sw_dict), self.target_time.isoformat(), self.target_date.isoformat()))
         for (inst, switchable_item) in sw_dict:
-            correction_text = switchable_item.correct_power_state(self.target_time)
+            correction_text = switchable_item.correct_power_state(self.target_time, self.target_date)
             print(correction_text)

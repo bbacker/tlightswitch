@@ -2,24 +2,30 @@
 
 import argparse
 import datetime
+from dateutil import parser
 import sys
 
 import taglightswitch
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--targettime", type=str, help="time against which ranges will be compared to advise or correct instance power states, e.g. 14:05:00")
-    parser.add_argument("-a", "--action", type=str, help="action: advise or correct. default=advise")
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("-t", "--targettime", type=str, help="time against which ranges will be compared to advise or correct instance power states, e.g. 14:05:00")
+    argparser.add_argument("-d", "--targetdate", type=str, help="date against which off days will be compared to advise or correct instance power states, e.g. Mon or 2018/3/18")
+    argparser.add_argument("-a", "--action", type=str, help="action: advise or correct. default=advise")
 
-    args = parser.parse_args()
+    args = argparser.parse_args()
 
     if args.targettime:
-        from dateutil import parser
         target_time = parser.parse(args.targettime).time()
     else:
         target_time = datetime.datetime.now().time()
 
-    ls = taglightswitch.lightswitch.LightSwitch(target_time)
+    if args.targetdate:
+        target_date = parser.parse(args.targetdate).date()
+    else:
+        target_date = datetime.datetime.now().date()
+
+    ls = taglightswitch.lightswitch.LightSwitch(target_time, target_date)
 
     if args.action == 'correct':
         ls.correct()
